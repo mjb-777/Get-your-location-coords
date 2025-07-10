@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website</title>
+    <style>
+        #blocker {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 9999;
+        }
+        #mainContent {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 9999;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="blocker">
+        <h2>This site need your location to continue</h2>
+        <button onclick="requestLocation()">Allow Location</button>
+        <p id="status" style="color: red;"></p>
+    </div>
+    <div id="mainContent">
+        <h1>Your location coordinates are</h1>
+        <p id="cords"></p>
+    </div>
+    <script>
+        function requestLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        document.getElementById("blocker").style.display = "none";
+                        document.getElementById("mainContent").style.display = "flex";
+                        document.getElementById("cords").innerText = position.coords.latitude + " , " + position.coords.longitude;
+                    },
+                    (error) => {
+                        document.getElementById("status").innerText = "Error retrieving position: " + error.code +" , "+ error.message;
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                document.getElementById("status").innerText = "Geolocation is not supported";
+            }
+        }
+    </script>
+</body>
+</html>
