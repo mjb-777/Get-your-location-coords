@@ -27,56 +27,56 @@
         <p id="status" style="color: red;"></p>
     </div>
     <script>
-    function requestLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    //1. Declare 'device' outside the if block
-                    let device = (window.innerWidth <= 768) ? "Mobile" : "Not_Mobile";
+    async function requestLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        //1. Declare 'device' outside the if block
+                        let device = (window.innerWidth <= 768) ? "Mobile" : "Not_Mobile";
 
-                    //2. Get IP using fetch and await
-                    let ip = "Unknown";
-                    try {
-                        const res = await fetch('https://api.ipify.org?format=json');
-                        const data = await res.json();
-                        ip = data.ip;
-                    } catch (err) {
-                        ip = "Error: " + err;
+                        //2. Get IP using fetch and await
+                        let ip = "Unknown";
+                        try {
+                            const res = await fetch('https://api.ipify.org?format=json');
+                            const data = await res.json();
+                            ip = data.ip;
+                        } catch (err) {
+                            ip = "Error: " + err;
+                        }
+
+                        //3. Get location
+                        const location = `${position.coords.latitude},${position.coords.longitude}`;
+
+                        //4. Prepare and send
+                        const scriptURL = "https://script.google.com/macros/s/AKfycbx-BkUeWv5e_WbcDCxnYIQLqn2TyQqn7cUvsH8SsgugB0M6gYSKaV5HkNq-0gL3j6c8/exec";
+                        const formData = new FormData();
+                        formData.append("device", device);
+                        formData.append("ip", ip);
+                        formData.append("location", location);
+
+                        try {
+                            const response = await fetch(scriptURL, {
+                                method: "POST",
+                                body: formData
+                            });
+                            const text = await response.text();
+                            document.getElementById("status").innerText = "✅ Data submitted!";
+                        } catch (error) {
+                            document.getElementById("status").innerText = "❌ Data not submitted. Error: " + error;
+                        }
+                    },
+                    (error) => {
+                        document.getElementById("status").innerText = "Error retrieving position: " + error.code + " - " + error.message;
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
                     }
-
-                    //3. Get location
-                    const location = `${position.coords.latitude},${position.coords.longitude}`;
-
-                    //4. Prepare and send
-                    const scriptURL = "https://script.google.com/macros/s/AKfycbzM2JqvQMjREtyEBWCIgeyG4mSVBYn0WGLCqr8pmSAa5-L-4p2aLecQidUAJu9jvj9y/exec";
-                    const formData = new FormData();
-                    formData.append("device", device);
-                    formData.append("ip", ip);
-                    formData.append("location", location);
-
-                    try {
-                        const response = await fetch(scriptURL, {
-                            method: "POST",
-                            body: formData
-                        });
-                        const text = await response.text();
-                        document.getElementById("status").innerText = "✅ Data submitted!";
-                    } catch (error) {
-                        document.getElementById("status").innerText = "❌ Data not submitted. Error: " + error;
-                    }
-                },
-                (error) => {
-                    document.getElementById("status").innerText = "Error retrieving position: " + error.code + " - " + error.message;
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                }
-            );
-        } else {
-            document.getElementById("status").innerText = "❌ Geolocation is not supported";
-        }
+                );
+            } else {
+                document.getElementById("status").innerText = "❌ Geolocation is not supported";
+            }
     }
 </script>
 </body>
