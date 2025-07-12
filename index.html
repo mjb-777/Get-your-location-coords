@@ -61,9 +61,15 @@
                         });
                         const text = await response.text();
                         document.getElementById("status").innerText = "✅ Data submitted!";
-                    } catch (error) {
-                        document.getElementById("status").innerText = "❌ Data not submitted. Error: " + error;
                     }
+                    .catch(error => {
+                      console.error("Detailed error:", error);
+                      document.getElementById("status").innerText = "❌ Data not submitted. Error: " + error;
+                    });
+
+                    /*catch (error) {
+                        document.getElementById("status").innerText = "❌ Data not submitted. Error: " + error;
+                    }*/
                 },
                 (error) => {
                     document.getElementById("status").innerText = "Error retrieving position: " + error.code + " - " + error.message;
